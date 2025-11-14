@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: openimis-be-kobo-connect
+Version: 1.0.0
+Summary: The openIMIS Backend Kobo Connect module.
+Home-page: https://openimis.org/
+Author: Abdoullatif
+Author-email: abdoullatifsooba7@gmail.com
+License: GNU AGPL v3
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 2.1
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Description-Content-Type: text/markdown
+
+openIMIS Backend Kobo Connect module

@@ -1,0 +1,20 @@
+[
+  {"model":"monitoring_evaluation.indicator","pk":1,
+   "fields":{"code":"ODP.002","name":"Bénéficiaires TMU urgences","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"ODP_002"}},
+  {"model":"monitoring_evaluation.indicator","pk":2,
+   "fields":{"code":"ODP.003","name":"Bénéficiaires TMU (femmes)","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"ODP_003"}},
+  {"model":"monitoring_evaluation.indicator","pk":3,
+   "fields":{"code":"ODP.004","name":"Bénéficiaires TMR NAFA","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"ODP_004"}},
+  {"model":"monitoring_evaluation.indicator","pk":4,
+   "fields":{"code":"ODP.005","name":"Bénéficiaires TMR NAFA (femmes)","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"ODP_005"}},
+  {"model":"monitoring_evaluation.indicator","pk":5,
+   "fields":{"code":"ODP.006","name":"Bénéficiaires filets sociaux","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"ODP_006"}},
+  {"model":"monitoring_evaluation.indicator","pk":6,
+   "fields":{"code":"IRI.001","name":"TMU reçus à temps","unit":"%","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"IRI_001"}},
+  {"model":"monitoring_evaluation.indicator","pk":7,
+   "fields":{"code":"IRI.007","name":"TMR avec mesures de résilience","unit":"Nombre","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"IRI_007"}},
+  {"model":"monitoring_evaluation.indicator","pk":8,
+   "fields":{"code":"IRI.012","name":"% plaintes traitées dans les délais","unit":"%","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"IRI_012"}},
+  {"model":"monitoring_evaluation.indicator","pk":9,
+   "fields":{"code":"IRI.009","name":"Femmes avec compte mobile","unit":"%","frequency":"T","is_automatic":true,"is_active":true,"formula_key":"IRI_009"}}
+]
