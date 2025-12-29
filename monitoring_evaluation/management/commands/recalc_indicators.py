@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_date
-from monitoring_evaluation.services.indicators import calculate_indicators_for_period
+from monitoring_evaluation.indicators_services import calculate_me_indicators_for_period
 
 class Command(BaseCommand):
     help = "Recalcule les indicateurs entre 2 dates (YYYY-MM-DD)"
@@ -16,5 +16,5 @@ class Command(BaseCommand):
         if not start or not end:
             self.stderr.write(self.style.ERROR("Dates invalides. Format attendu: YYYY-MM-DD YYYY-MM-DD"))
             return
-        count = calculate_indicators_for_period(start, end)
+        count = calculate_me_indicators_for_period(start, end)
         self.stdout.write(self.style.SUCCESS(f"Recalcul terminé : {count} indicateurs."))

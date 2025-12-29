@@ -1,0 +1,100 @@
+{
+  "indicator": "<ID_DE_L_INDICATEUR>",
+  "module": "payroll",
+  "model": "BenefitConsumption",
+  "date_field": "date_due",
+  "aggregation": "PERCENT",
+  "distinct_field": "individual_id",
+  "filters": {},
+  "numerator_filters": {
+    "receipt__isnull": false,
+    "status": "RECONCILED"
+  },
+  "denominator_filters": {
+    "status__in": [
+      "ACCEPTED",
+      "APPROVE_FOR_PAYMENT",
+      "RECONCILED"
+    ]
+  },
+  "is_active": true
+}
+{
+  "indicator": "<ID_DE_L_INDICATEUR>",
+  "module": "individual",
+  "model": "Individual",
+  "date_field": "created_at",
+  "aggregation": "PERCENT",
+  "distinct_field": "id",
+
+  "numerator_filters": {
+    "json_ext__sexe_bp": "F",
+    "json_ext__numero_paie__isnull": false
+  },
+
+  "denominator_filters": {},
+
+  "is_active": true
+}
+{
+  "indicator": "<ID_INDICATEUR>",
+  "module": "grievance_social_protection",
+  "model": "Ticket",
+  "date_field": "created_at",
+  "aggregation": "PERCENT",
+  "distinct_field": "id",
+
+  "numerator_filters": {
+    "status__in": ["RESOLVED", "CLOSED"],
+    "due_date__isnull": false
+  },
+
+  "denominator_filters": {},
+
+  "is_active": true
+}
+
+
+ODP.002 – Bénéficiaires TMU
+{
+  "module": "payment",
+  "model": "Payment",
+  "date_field": "payment_date",
+  "aggregation": "COUNT_DISTINCT",
+  "distinct_field": "beneficiary_id",
+  "filters": {
+    "transfer_type": "TMU",
+    "status": "PAID"
+  }
+}
+
+IRI.012 – % plaintes traitées dans les délais
+{
+  "module": "grievance_social_protection",
+  "model": "Ticket",
+  "date_field": "created_at",
+  "aggregation": "PERCENT",
+  "numerator_filters": {
+    "status": "CLOSED",
+    "resolution_delay_days__lte": 30
+  },
+  "denominator_filters": {}
+}
+
+IRI.001 – % TMU reçus à temps
+{
+  "module": "payment",
+  "model": "Payment",
+  "date_field": "payment_date",
+  "aggregation": "PERCENT",
+  "distinct_field": "beneficiary_id",
+  "numerator_filters": {
+    "transfer_type": "TMU",
+    "status": "PAID",
+    "is_on_time": true
+  },
+  "denominator_filters": {
+    "transfer_type": "TMU",
+    "status": "PAID"
+  }
+}

@@ -1,10 +1,10 @@
 Metadata-Version: 2.1
-Name: openimis-be-kobo-connect
+Name: openimis-be-monitoring-evaluation
 Version: 1.0.0
-Summary: The openIMIS Backend Kobo Connect module.
+Summary: The openIMIS Backend Monitoring evaluation module.
 Home-page: https://openimis.org/
-Author: Abdoullatif
-Author-email: abdoullatifsooba7@gmail.com
+Author: Sekou SACKO
+Author-email: sekou.sacko@yahoo.fr
 License: GNU AGPL v3
 Classifier: Environment :: Web Environment
 Classifier: Framework :: Django

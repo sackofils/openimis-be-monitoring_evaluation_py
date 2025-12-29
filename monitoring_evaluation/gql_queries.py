@@ -1,107 +1,135 @@
 import graphene
-from core import prefix_filterset, ExtendedConnection
-from core.gql.gql_gis import CustomDjangoFilterConnectionField
-from core.schema import OrderedDjangoFilterConnectionField
-from core.gql.custom_lookup import NotEqual
-
-from django.db.models import Field
-from django.core.exceptions import PermissionDenied
-from django.utils.translation import gettext as _
-
+from graphene_django import DjangoObjectType
+from core import ExtendedConnection
 from .models import Indicator, IndicatorValue, MonitoringLog
-from .gql_types import IndicatorGQLType, IndicatorValueGQLType, MonitoringLogGQLType
 
 
-Field.register_lookup(NotEqual)
 
-
-class Query(graphene.ObjectType):
+class IndicatorGQLType(DjangoObjectType):
     """
-    Déclaration des requêtes GraphQL du module Suivi-Évaluation
+    Type GraphQL pour Indicator
     """
 
-    # === Requêtes principales ===
-    indicators = OrderedDjangoFilterConnectionField(
-        IndicatorGQLType,
-        orderBy=graphene.List(of_type=graphene.String),
-        is_active=graphene.Boolean(),
-        search=graphene.String(description="Recherche plein texte (nom, code, description)"),
+    # Champs GraphQL personnalisés
+    values = graphene.List(
+        lambda: IndicatorValueGQLType,
+        description="Liste complète des valeurs de l’indicateur"
     )
 
-    indicator_values = OrderedDjangoFilterConnectionField(
-        IndicatorValueGQLType,
-        orderBy=graphene.List(of_type=graphene.String),
-        indicator_code=graphene.String(),
-        region_code=graphene.String(),
-        gender=graphene.String(),
-        validated=graphene.Boolean(),
-        start_date=graphene.String(),
-        end_date=graphene.String(),
+    value = graphene.Field(
+        lambda: IndicatorValueGQLType,
+        description="Dernière valeur de l’indicateur"
     )
 
-    monitoring_logs = OrderedDjangoFilterConnectionField(
-        MonitoringLogGQLType,
-        orderBy=graphene.List(of_type=graphene.String),
-        success=graphene.Boolean(),
+    last_value = graphene.Float(
+        description="Dernière valeur numérique de l’indicateur"
     )
 
-    # === Résolveurs ===
+    category = graphene.String(description="Catégorie de l’indicateur")
 
-    def resolve_indicators(self, info, **kwargs):
-        user = info.context.user
-        if not user.is_authenticated:
-            raise PermissionDenied(_("Vous devez être connecté."))
+    last_updated_date = graphene.String(description="Date de la ddernière mise à jour")
 
-        qs = Indicator.objects.all()
+    # ---------- RESOLVERS ----------
+    def resolve_values(self, info):
+        return (
+            self.values.filter(is_deleted=False)
+            .order_by("-period_end", "-period_start")
+        )
 
-        # filtre "actif"
-        if "is_active" in kwargs:
-            qs = qs.filter(is_active=kwargs["is_active"])
+    def resolve_value(self, info):
+        last_value = self.values.filter(is_deleted=False).order_by("-period_end", "-period_start").first()
+        return last_value
 
-        # recherche plein texte
-        search = kwargs.get("search")
-        if search:
-            qs = qs.filter(
-                models.Q(name__icontains=search)
-                | models.Q(description__icontains=search)
-                | models.Q(code__icontains=search)
-            )
+    def resolve_last_value(self, info):
+        v = self.values.filter(is_deleted=False).order_by("-period_end", "-period_start").first()
+        return v.value if v else None
 
-        return qs.order_by("code")
+    def resolve_last_updated_date(self, info):
+        v = self.values.filter(is_deleted=False).order_by("-period_end", "-period_start").first()
+        return v.date_updated if v else None
 
-    def resolve_indicator_values(self, info, **kwargs):
-        user = info.context.user
-        if not user.is_authenticated:
-            raise PermissionDenied(_("Authentification requise."))
+    # ---------- META (toujours tout en bas !) ----------
+    class Meta:
+        model = Indicator
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = {
+            "id": ["exact"],
+            "code": ["exact", "icontains"],
+            "type": ["exact", "icontains"],
+            "category": ["exact"],
+            "method": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            "module": ["exact", "icontains"],
+            "name": ["icontains"],
+            "frequency": ["exact"],
+            "is_active": ["exact"],
+        }
 
-        qs = IndicatorValue.objects.select_related("indicator")
 
-        if "indicator_code" in kwargs:
-            qs = qs.filter(indicator__code=kwargs["indicator_code"])
+class IndicatorValueGQLType(DjangoObjectType):
+    """
+    Type GraphQL pour IndicatorValue
+    conforme à Relay + ExtendedConnection
+    """
 
-        if "region_code" in kwargs:
-            qs = qs.filter(region_code=kwargs["region_code"])
+    # Champ calculé pour affichage FE
+    period = graphene.String(description="Période formatée : YYYY-MM-DD → YYYY-MM-DD")
+    display_value = graphene.String()
 
-        if "gender" in kwargs:
-            qs = qs.filter(gender=kwargs["gender"])
+    class Meta:
+        model = IndicatorValue
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
 
-        if "validated" in kwargs:
-            qs = qs.filter(validated=kwargs["validated"])
+        # EXPLICITE : les noms exposés à GraphQL seront en camelCase
+        fields = (
+            "id",
+            "indicator",
+            "period_start",
+            "period_end",
+            "region_code",
+            "gender",
+            "value",
+            "qualitative_value",
+            "source",
+            "validated",
+            "validated_by",
+        )
 
-        if "start_date" in kwargs:
-            qs = qs.filter(period_start__gte=kwargs["start_date"])
+        filter_fields = {
+            "id": ["exact"],
+            "indicator__code": ["exact", "icontains"],
+            "region_code": ["exact", "icontains"],
+            "gender": ["exact"],
+            "validated": ["exact"],
+            "period_start": ["gte", "lte"],
+            "period_end": ["gte", "lte"],
+        }
 
-        if "end_date" in kwargs:
-            qs = qs.filter(period_end__lte=kwargs["end_date"])
+    # ---------- RESOLVERS ----------
+    def resolve_period(self, info):
+        """Retourne une période lisible pour le FE."""
+        if not self.period_start or not self.period_end:
+            return ""
+        return f"{self.period_start} → {self.period_end}"
 
-        return qs.order_by("-period_start", "indicator__code")
+    def resolve_display_value(self, info):
+        return (
+            str(self.value)
+            if self.value is not None
+            else self.qualitative_value or "-"
+        )
 
-    def resolve_monitoring_logs(self, info, **kwargs):
-        user = info.context.user
-        if not user.is_authenticated:
-            raise PermissionDenied(_("Authentification requise."))
 
-        qs = MonitoringLog.objects.select_related("executed_by")
-        if "success" in kwargs:
-            qs = qs.filter(success=kwargs["success"])
-        return qs.order_by("-executed_at")
+class MonitoringLogGQLType(DjangoObjectType):
+    class Meta:
+        model = MonitoringLog
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "period_start": ["exact", "gte", "lte"],
+            "period_end": ["exact", "gte", "lte"],
+            "executed_by__username": ["icontains"],
+            "success": ["exact"],
+        }
+        connection_class = ExtendedConnection

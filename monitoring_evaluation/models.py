@@ -11,43 +11,84 @@ class Indicator(HistoryBusinessModel):
     Représente un indicateur du cadre de résultats du projet.
     Exemple : 'Nombre de ménages bénéficiaires des transferts monétaires'.
     """
+    FREQUENCIES_OPTIONS = [
+        ('Une fois', 'Une fois'),
+        ('2 fois', '2 fois'),
+        ('3 fois', '3 fois'),
+        ('Mensuel', 'Mensuel'),
+        ('Trimestriel', 'Trimestriel'),
+        ('Semestriel', 'Semestriel'),
+        ('Annuel', 'Annuel')
+    ]
 
-    class Frequency(models.TextChoices):
-        MONTHLY = "M", _("Mensuel")
-        QUARTERLY = "T", _("Trimestriel")
-        SEMIANNUAL = "S", _("Semestriel")
-        ANNUAL = "A", _("Annuel")
+    UNIT_OPTIONS = [
+        ('GNF', 'GNF'),
+        ('Nombre', 'Nombre'),
+        ('Pourcentage', 'Pourcentage'),
+        ('Oui/Non', 'Oui/Non'),
+    ]
 
+    MODULE_OPTIONS = [
+        ('individual', 'Individual'),
+        ('social_protection', 'Protection sociale'),
+        ('grievance_social_protection', 'Grievance'),
+    ]
+
+    METHOD_OPTIONS = [
+        ('AUTOMATIQUE', 'Automatique'),
+        ('MANUEL', 'Manuelle'),
+    ]
+
+    STATUS_OPTIONS = [
+        ('BROUILLON', 'Brouillon'),
+        ('ACTIVE', 'Active'),
+        ('INACTIVE', 'Inactive'),
+        ('ARCHIVE', 'Archive'),
+    ]
+
+    TYPE_OPTIONS = [
+        ('QUANTITATIVE', 'Quantitatif'),
+        ('QUALITATIVE', 'Qualitatif'),
+        ('COMPOSITE', 'Composite'),
+    ]
+
+    CATEGORY_PIP = "PIP"
+    CATEGORY_RF = "RESULT_FRAMEWORK"
+
+    CATEGORY_CHOICES = [
+        (CATEGORY_PIP, "PIP"),
+        (CATEGORY_RF, "Result Framework"),
+    ]
+
+    category = models.CharField(
+        max_length=32,
+        choices=CATEGORY_CHOICES,
+        default=CATEGORY_PIP,
+        db_index=True,
+        verbose_name="Catégorie de l’indicateur",
+    )
     code = models.CharField(_("Code"), max_length=50, unique=True)
     name = models.CharField(_("Nom de l’indicateur"), max_length=255)
     description = models.TextField(_("Description / Définition"), blank=True, null=True)
 
-    unit = models.CharField(_("Unité de mesure"), max_length=50, help_text=_("Ex: Nombre, %, Oui/Non"))
+    type = models.CharField(_("Type d'inddicateur"), max_length=50, choices=TYPE_OPTIONS, default='QUANTITATIVE')
+    unit = models.CharField(_("Unité de mesure"), max_length=50, choices=UNIT_OPTIONS, help_text=_("Ex: Nombre, %, Oui/Non"))
     frequency = models.CharField(
         _("Fréquence de suivi"),
-        max_length=1,
-        choices=Frequency.choices,
-        default=Frequency.QUARTERLY,
-    )
-    disaggregation = models.CharField(
-        _("Ventilation"),
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text=_("Ex: Par sexe, par région, etc."),
+        max_length=16,
+        choices=FREQUENCIES_OPTIONS,
+        default='Mensuel',
     )
 
-    data_source = models.CharField(_("Source des données"), max_length=255, blank=True, null=True)
-    collection_method = models.TextField(_("Méthodologie de collecte"), blank=True, null=True)
-    responsible = models.CharField(_("Responsable de la collecte"), max_length=255, blank=True, null=True)
-    calculation_method = models.TextField(_("Méthode de calcul"), blank=True, null=True)
-    quality_review = models.TextField(_("Processus d’examen de la qualité"), blank=True, null=True)
-    budget_notes = models.TextField(_("Budget collecte/analyse"), blank=True, null=True)
-    formula_key = models.CharField(
+    target = models.FloatField(_("Final target"), default=1)
+    module = models.CharField(_("Source des données"), choices=MODULE_OPTIONS, max_length=255, blank=True, null=True)
+    formula = models.CharField(
         _("Clé de calcul automatique"), max_length=50, blank=True, null=True,
         help_text=_("Identifiant logique de la formule (ex : ODP_002, IRI_001)")
     )
-
+    method = models.CharField(max_length=16, choices=METHOD_OPTIONS, default='AUTOMATIQUE')
+    calculation_method = models.TextField(_("Méthode de calcul"), blank=True, null=True)
+    status = models.CharField(max_length=16, choices=STATUS_OPTIONS, default='BROUILLON')
     is_automatic = models.BooleanField(
         _("Calcul automatique"),
         default=False,
@@ -153,12 +194,12 @@ class MonitoringLog(HistoryModel):
 
 class MonitoringSubmission(HistoryModel):
     FORM_TYPES = [
-        ("TMU_TMR", "Transferts Monétaires (Urgence/Régulier)"),
-        ("SERE_NAFA", "Sensibilisation à la Résilience (SERE NAFA)"),
-        ("AGR", "Activité Génératrice de Revenus"),
-        ("SUBVENTION_BENEF", "Subvention Bénéficiaires"),
+        # ("TMU_TMR", "Transferts Monétaires (Urgence/Régulier)"),
+        # ("AGR", "Activité Génératrice de Revenus"),
+        ("FICHE_SUIVI_SERE_NAFA", "Fiche de suivi des Sère Nafa"),
+        ("CONSTITUTION_SERE_NAFA", "Constitution des Sèrè Nafa"),
+        ("FICHE_ENREG_BENEFICIAIRE", "Fiche d'enregistrement des Bénéficiaires"),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     form_type = models.CharField(max_length=50, choices=FORM_TYPES)
     submission_uuid = models.CharField(max_length=255, unique=True, null=True, blank=True)  # _uuid Kobo
     submitted_at = models.DateTimeField(null=True, blank=True)
@@ -186,8 +227,91 @@ class MonitoringSubmission(HistoryModel):
             models.Index(fields=["location"]),
             GinIndex(fields=["json_ext"]),
         ]
-        ordering = ["-submitted_at", "-created_at"]
+        ordering = ["-submitted_at", "-date_created"]
 
     def __str__(self):
         return f"{self.form_type} | {self.submission_uuid or self.id}"
 
+
+class IndicatorDataSource(HistoryModel):
+    """
+    Décrit la source et la logique de calcul d’un indicateur ME
+    """
+
+    AGGREGATION_CHOICES = [
+        ("COUNT", "Count"),
+        ("COUNT_DISTINCT", "Count distinct"),
+        ("SUM", "Sum"),
+        ("PERCENT", "Percent"),
+    ]
+
+    indicator = models.OneToOneField(
+        "Indicator",
+        related_name="data_source",
+        on_delete=models.CASCADE,
+    )
+
+    # Module applicatif
+    module = models.CharField(
+        max_length=64,
+        help_text="Ex: payment, grievance_social_protection, social_protection"
+    )
+
+    # Modèle Django cible
+    model = models.CharField(
+        max_length=64,
+        help_text="Ex: Payment, Ticket, Individual"
+    )
+
+    # Champ date pour la période
+    date_field = models.CharField(
+        max_length=64,
+        default="created_at",
+        help_text="Champ date utilisé pour la période"
+    )
+
+    # Type d’agrégation
+    aggregation = models.CharField(
+        max_length=32,
+        choices=AGGREGATION_CHOICES
+    )
+
+    # Champ principal (value / beneficiary / amount…)
+    value_field = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="Ex: amount, beneficiary_id"
+    )
+
+    # Pour COUNT_DISTINCT
+    distinct_field = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="Ex: beneficiary_id"
+    )
+
+    # Filtres dynamiques (JSON)
+    filters = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="Filtres Django ORM sous forme JSON"
+    )
+
+    # Pourcentages
+    numerator_filters = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="Filtres du numérateur (PERCENT)"
+    )
+    denominator_filters = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="Filtres du dénominateur (PERCENT)"
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.indicator.code} → {self.module}.{self.model}"

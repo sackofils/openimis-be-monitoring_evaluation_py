@@ -1,9 +1,80 @@
 from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
 from datetime import date
+from django_json_widget.widgets import JSONEditorWidget
+from django.db import models
 
-from .models import Indicator, IndicatorValue, MonitoringLog
-from .services import calculate_indicators_for_period
+from .models import Indicator, IndicatorValue, MonitoringLog, IndicatorDataSource
+from .indicators_services import calculate_me_indicators_for_period
+
+@admin.register(IndicatorDataSource)
+class IndicatorDataSourceAdmin(admin.ModelAdmin):
+    list_display = (
+        "indicator",
+        "module",
+        "model",
+        "aggregation",
+        "date_field",
+        "is_active",
+    )
+
+    list_filter = (
+        "aggregation",
+        "module",
+        "is_active",
+        "indicator__category",
+    )
+
+    search_fields = (
+        "indicator__code",
+        "indicator__name",
+        "module",
+        "model",
+    )
+
+    autocomplete_fields = ("indicator",)
+
+    readonly_fields = ()
+
+    fieldsets = (
+        ("Indicateur", {
+            "fields": ("indicator", "is_active")
+        }),
+        ("Source de données", {
+            "fields": ("module", "model", "date_field")
+        }),
+        ("Méthode de calcul", {
+            "fields": (
+                "aggregation",
+                "value_field",
+                "distinct_field",
+            )
+        }),
+        ("Filtres globaux", {
+            "fields": ("filters",),
+            "description": "Filtres Django ORM (JSON)"
+        }),
+        ("Calcul de pourcentage", {
+            "fields": (
+                "numerator_filters",
+                "denominator_filters",
+            ),
+            "description": "Uniquement si aggregation = PERCENT"
+        }),
+    )
+
+    formfield_overrides = {
+        models.JSONField: {
+            "widget": JSONEditorWidget(
+                mode="tree",
+                options={"search": True}
+            )
+        }
+    }
+
+    def save_model(self, request, obj, form, change):
+        obj.save(user=request.user)
+
 
 
 @admin.action(description=_("Recalculer les indicateurs automatiques"))
@@ -34,7 +105,7 @@ def recalculate_indicators(modeladmin, request, queryset):
     for ind in indicators:
         try:
             defaults = ind.compute_value(start, end, user=user) if hasattr(ind, "compute_value") \
-                else calculate_indicators_for_period(start, end, ctx={"user": user})
+                else calculate_me_indicators_for_period(start, end, ctx={"user": user})
             count += 1
         except Exception as e:
             errors.append(f"{ind.code}: {e}")
@@ -67,6 +138,14 @@ class IndicatorAdmin(admin.ModelAdmin):
     search_fields = ("code", "name")
     actions = [recalculate_indicators]
 
+    def datasource_link(self, obj):
+        if hasattr(obj, "data_source"):
+            return f"{obj.data_source.aggregation}"
+        return "Non configuré"
+
+    def save_model(self, request, obj, form, change):
+        obj.save(user=request.user)
+
 
 @admin.register(IndicatorValue)
 class IndicatorValueAdmin(admin.ModelAdmin):
@@ -81,6 +160,9 @@ class IndicatorValueAdmin(admin.ModelAdmin):
     )
     list_filter = ("indicator", "region_code", "validated")
     search_fields = ("indicator__code", "indicator__name")
+
+    def save_model(self, request, obj, form, change):
+        obj.save(user=request.user)
 
 
 @admin.register(MonitoringLog)
