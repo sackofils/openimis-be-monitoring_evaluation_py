@@ -1,36 +1,123 @@
+import json
 import logging
+from datetime import datetime, timedelta
 from django.apps import apps
 from django.db.models import Sum, Q
 from django.db import transaction
 from .models import Indicator, IndicatorValue, MonitoringSubmission, MonitoringLog
 from payroll.models import Payroll, PayrollBenefitConsumption, BenefitConsumption, BenefitConsumptionStatus
 from social_protection.models import Beneficiary, BenefitPlan, BeneficiaryStatus
+from grievance_social_protection.models import Ticket
 
 
 logger = logging.getLogger(__name__)
 
 
+def prepare_sla(instance):
+    SLA_DAYS = 21
+    WARN_WINDOW = 3
+
+    # Parse du JSON
+    json_ext = getattr(instance, "json_ext", {}) or {}
+    if isinstance(json_ext, str):
+        try:
+            json_ext = json.loads(json_ext)
+        except Exception:
+            json_ext = {}
+
+    # Récupération de la date de soumission
+    submitted_at = json_ext.get("submitted_at") or instance.date_created
+    if not submitted_at:
+        return None
+
+    try:
+        submitted_dt = (
+            datetime.fromisoformat(submitted_at)
+            if isinstance(submitted_at, str)
+            else submitted_at
+        )
+    except Exception:
+        return None
+
+    # Calcul date d’échéance
+    due_date = submitted_dt + timedelta(days=SLA_DAYS)
+    today = datetime.now()
+
+    # Calcul du délai restant
+    delta = (due_date - today).days
+
+    if delta < 0:
+        sla_state = "En depassement"
+    elif delta <= WARN_WINDOW:
+        sla_state = "En alerte"
+    else:
+        sla_state = "Dans les délais"
+
+    return {
+        "submitted_at": submitted_dt.isoformat(),
+        "due_date": due_date.isoformat(),
+        "days_remaining": delta,
+        "sla_state": sla_state,
+    }
+
 # --------------------------------------------------------------------
 # Utilitaire d’enregistrement de valeur
 # --------------------------------------------------------------------
 
-def _save_value(indicator, start, end, value, region=None, gender=None, source="KoboForm"):
+def _save_value(indicator, start, end, value, region=None, gender=None, source="SYSTEM"):
     """
     Crée ou met à jour une valeur d’indicateur pour une période donnée.
     """
-    IndicatorValue.objects.update_or_create(
+    indicatorvalue = IndicatorValue.objects.filter(
         indicator=indicator,
         period_start=start,
         period_end=end,
         region_code=region,
         gender=gender,
-        defaults=dict(
+    ).first()
+
+    if not indicatorvalue:
+        indicatorvalue = IndicatorValue(
+            indicator=indicator,
+            period_start=start,
+            period_end=end,
+            region_code=region,
+            gender=gender,
             value=value,
             source=source,
             validated=True,
-        ),
-    )
-    logger.debug(f"[ME] {indicator.code}: sauvegardé ({start}→{end}) = {value}")
+        )
+        indicatorvalue.save(username="Admin")
+        logger.info(
+            f"[ME] {indicator.code}: créé ({start}→{end}) = {value}"
+        )
+        return
+
+    # Détection de changement réel
+    has_change = False
+
+    if indicatorvalue.value != value:
+        indicatorvalue.value = value
+        has_change = True
+
+    if indicatorvalue.source != source:
+        indicatorvalue.source = source
+        has_change = True
+
+    if not indicatorvalue.validated:
+        indicatorvalue.validated = True
+        has_change = True
+
+    if has_change:
+        indicatorvalue.save(username="Admin")
+        logger.info(
+            f"[ME] {indicator.code}: mis à jour ({start}→{end}) = {value}"
+        )
+    else:
+        logger.debug(
+            f"[ME] {indicator.code}: aucune modification ({start}→{end})"
+        )
+
 
 def _safe_percent(num, den):
     return round((num / den) * 100, 2) if den else 0.0
@@ -75,6 +162,39 @@ def compute_indicator_from_datasource(indicator, start, end):
 
     _save_value(indicator, start, end, value)
 
+def calc_IRI_012(indicator, start, end):
+    """
+    IRI.012 – % plaintes traitées dans les délais SLA
+    """
+
+    tickets = Ticket.objects.filter()
+
+    total_received = tickets.count()
+    if total_received == 0:
+        return
+
+    treated = tickets.filter(
+        status__in=[
+            Ticket.TicketStatus.RESOLVED,
+            Ticket.TicketStatus.CLOSED
+        ]
+    )
+
+    treated_on_time = 0
+    for ticket in treated:
+        sla = prepare_sla(ticket)
+        if sla and sla["sla_state"] == "Dans les délais":
+            treated_on_time += 1
+
+    value = round((treated_on_time / total_received) * 100, 2)
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=value,
+        source="Grievance / Social Protection"
+    )
+
 
 def calc_ODP_002(indicator, start, end):
     """
@@ -94,7 +214,7 @@ def calc_ODP_002(indicator, start, end):
 
     # 3. Paiements effectivement reçus dans la période
     paid_benefits = BenefitConsumption.objects.filter(
-        benefit__in=beneficiaries,
+        individual__in=[b.individual for b in beneficiaries],
         status__in=[
             BenefitConsumptionStatus.ACCEPTED,
             BenefitConsumptionStatus.RECONCILED
@@ -104,7 +224,7 @@ def calc_ODP_002(indicator, start, end):
 
     # 4. Nombre distinct de bénéficiaires payés
     count = paid_benefits.values(
-        "benefit__individual_id"
+        "individual_id"
     ).distinct().count()
 
     # 5. Enregistrement (cumulatif)
@@ -135,7 +255,7 @@ def calc_ODP_003(indicator, start, end):
 
     # 3. Paiements effectivement reçus dans la période
     paid_benefits = BenefitConsumption.objects.filter(
-        benefit__in=beneficiaries,
+        individual__in=[b.individual for b in beneficiaries],
         status__in=[
             BenefitConsumptionStatus.ACCEPTED,
             BenefitConsumptionStatus.RECONCILED
@@ -145,7 +265,7 @@ def calc_ODP_003(indicator, start, end):
 
     # 4. Dénominateur : total bénéficiaires payés TMU
     total_paid = paid_benefits.values(
-        "benefit__individual_id"
+        "individual_id"
     ).distinct().count()
 
     if total_paid == 0:
@@ -153,7 +273,7 @@ def calc_ODP_003(indicator, start, end):
     else:
         # 5. Numérateur : femmes bénéficiaires payées
         women_paid = paid_benefits.filter(
-            benefit__individual__json_ext__sexe_bp="F"
+            individual__json_ext__sexe_bp="F"
         ).values(
             "benefit__individual_id"
         ).distinct().count()
@@ -335,8 +455,8 @@ def calc_PIP_011(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_ENREG_BENEFICIAIRE",
-        submitted_at__lte=end,   # cumulatif jusqu'à la période
+        form_type="FICHE_ENREG_BENEFICIAIRE"
+        #submitted_at__lte=end,   # cumulatif jusqu'à la période
     )
 
     if not qs.exists():
@@ -344,25 +464,17 @@ def calc_PIP_011(indicator, start, end):
         return
 
     # --- Cas 1 : bénéficiaire relationnel ---
-    if hasattr(MonitoringSubmission, "beneficiary_id"):
-        count = (
-            qs.exclude(beneficiary__isnull=True)
-              .values("beneficiary_id")
-              .distinct()
-              .count()
+    # --- Cas 2 : bénéficiaire dans le JSON Kobo ---
+    count = (
+        qs.exclude(
+            json_ext__groupe_ben__groupe_ajoute_preload__code_menage__isnull=True
         )
-    else:
-        # --- Cas 2 : bénéficiaire dans le JSON Kobo ---
-        count = (
-            qs.exclude(
-                json_ext__groupe_ben__groupe_ajoute_preload__code_menage__isnull=True
-            )
-            .values(
-                "json_ext__groupe_ben__groupe_ajoute_preload__code_menage"
-            )
-            .distinct()
-            .count()
+        .values(
+            "json_ext__groupe_ben__groupe_ajoute_preload__code_menage"
         )
+        .distinct()
+        .count()
+    )
 
     _save_value(
         indicator=indicator,
@@ -398,12 +510,7 @@ def calc_PIP_013(indicator, start, end):
 
     # Identifiant unique du Sèrè Nafa (code_sere)
     count = (
-        qs.exclude(
-            json_ext__groupe_identite__groupe_ajoute_preload__code_sere__isnull=True
-        )
-        .values(
-            "json_ext__groupe_identite__groupe_ajoute_preload__code_sere"
-        )
+        qs
         .distinct()
         .count()
     )
@@ -416,7 +523,7 @@ def calc_PIP_013(indicator, start, end):
         source="Fiche de constitution des Sèrès Nafa",
     )
 
-def calc_PIP_015(indicator, start, end):
+def calc_PIP_014(indicator, start, end):
     """
     ODP_SERE_002 – Taux de Sèrè Nafa fonctionnant de manière satisfaisante
 
@@ -425,8 +532,8 @@ def calc_PIP_015(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA",
-        submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA"
+        # submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -437,12 +544,7 @@ def calc_PIP_015(indicator, start, end):
     # DÉNOMINATEUR : Sèrè Nafa suivis
     # -------------------------------
     total_sere = (
-        qs.exclude(
-            json_ext__groupe_identite__groupe_ajoute_preload__code_sere__isnull=True
-        )
-        .values(
-            "json_ext__groupe_identite__groupe_ajoute_preload__code_sere"
-        )
+        qs
         .distinct()
         .count()
     )
@@ -457,15 +559,9 @@ def calc_PIP_015(indicator, start, end):
     functioning_sere = (
         qs.filter(
             # Critère 1 : règlement intérieur respecté
-            json_ext__reglement_sere__reglementInterieur__contains=["Oui"],
+            json_ext__reglement_sere__reglementInterieur__icontains=["Oui"],
             # Critère 2 : participation effective
             json_ext__groupe_presence__nbre_homme__gt=0,
-        )
-        .exclude(
-            json_ext__groupe_identite__groupe_ajoute_preload__code_sere__isnull=True
-        )
-        .values(
-            "json_ext__groupe_identite__groupe_ajoute_preload__code_sere"
         )
         .distinct()
         .count()
@@ -484,7 +580,7 @@ def calc_PIP_015(indicator, start, end):
         source="Fiche de suivi des Sèrès Nafa",
     )
 
-def calc_PIP_016(indicator, start, end):
+def calc_PIP_015(indicator, start, end):
     """
     ODP_SERE_003 – Épargne moyenne collectée par membre des Sèrès Nafa
 
@@ -494,8 +590,8 @@ def calc_PIP_016(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA",
-        submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA"
+        #submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -542,7 +638,7 @@ def calc_PIP_016(indicator, start, end):
         source="Fiche de suivi des Sèrès Nafa",
     )
 
-def calc_pip_017(indicator, start, end):
+def calc_PIP_016(indicator, start, end):
     """
     ODP_SERE_004 – Épargne cumulée par Sèrè Nafa
 
@@ -557,8 +653,8 @@ def calc_pip_017(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA",
-        submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA"
+        #submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -631,8 +727,8 @@ def calc_PIP_017(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA",
-        submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA"
+        #submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -683,8 +779,8 @@ def calc_PIP_018(indicator, start, end):
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA",
-        submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA"
+        #submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -741,24 +837,26 @@ def calc_PIP_018(indicator, start, end):
 
 
 FORMULAS = {
+    "IRI_012": calc_IRI_012,
     "ODP_002": calc_ODP_002,
     "ODP_003": calc_ODP_003,
     "ODP_004": calc_ODP_004,
     "ODP_005": calc_ODP_005,
     "ODP_006": calc_ODP_006,
-    "PIP_011": calc_PIP_011,
-    "PIP_013": calc_PIP_013,
-    "PIP_015": calc_PIP_015,
-    "PIP_016": calc_PIP_016,
-    "PIP_017": calc_PIP_017,
-    "PIP_018": calc_PIP_018,
+    "PIP_11": calc_PIP_011,
+    "PIP_13": calc_PIP_013,
+    "PIP_14": calc_PIP_014,
+    "PIP_15": calc_PIP_015,
+    "PIP_16": calc_PIP_016,
+    "PIP_17": calc_PIP_017,
+    "PIP_18": calc_PIP_018,
 }
 
 @transaction.atomic
 def calculate_me_indicators_for_period(start, end, user=None):
     indicators = Indicator.objects.filter(
         is_active=True,
-        is_automatic=True,
+        method='AUTOMATIQUE',
         data_source__is_active=True
     )
 
@@ -774,12 +872,12 @@ def calculate_me_indicators_for_period(start, end, user=None):
             errors.append(msg)
             logger.error(f"[ME] {msg}")
 
-    indicators = Indicator.objects.filter(is_active=True, is_automatic=True, formula__isnull=False)
+    indicators = Indicator.objects.filter(is_active=True, method='AUTOMATIQUE', formula__isnull=False)
     for ind in indicators:
         try:
             fn = FORMULAS.get(ind.formula)
             if fn:
-                fn(ind, period_start, period_end)
+                fn(ind, start, end)
                 computed += 1
         except Exception as e:
             msg = f"{ind.code}: {e}"
@@ -787,7 +885,7 @@ def calculate_me_indicators_for_period(start, end, user=None):
             logger.error(f"[ME] {msg}")
 
 
-    MonitoringLog.objects.create(
+    monitoring = MonitoringLog(
         period_start=start,
         period_end=end,
         indicators_count=computed,
@@ -795,5 +893,6 @@ def calculate_me_indicators_for_period(start, end, user=None):
         error_details="\n".join(errors) if errors else None,
         executed_by=user,
     )
+    monitoring.save(user=user)
 
     return computed

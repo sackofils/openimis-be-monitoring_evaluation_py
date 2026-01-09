@@ -24,7 +24,7 @@ def current_quarter_dates():
     return start, end
 
 
-def run_recalculate_indicators_job(username="admin"):
+def run_recalculate_indicators_job(username="Admin"):
     """
     Recalcule tous les indicateurs automatiques Kobo (ODP/IRI)
     pour la période trimestrielle en cours.

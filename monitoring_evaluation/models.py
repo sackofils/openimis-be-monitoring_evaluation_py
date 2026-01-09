@@ -12,20 +12,20 @@ class Indicator(HistoryBusinessModel):
     Exemple : 'Nombre de ménages bénéficiaires des transferts monétaires'.
     """
     FREQUENCIES_OPTIONS = [
-        ('Une fois', 'Une fois'),
-        ('2 fois', '2 fois'),
-        ('3 fois', '3 fois'),
-        ('Mensuel', 'Mensuel'),
-        ('Trimestriel', 'Trimestriel'),
-        ('Semestriel', 'Semestriel'),
-        ('Annuel', 'Annuel')
+        ('UNE_FOIS', 'Une fois'),
+        ('DEUX_FOIS', 'Deux fois'),
+        ('TROIS_FOIS', 'Trois fois'),
+        ('MENSUEL', 'Mensuel'),
+        ('TRIMESTRIEL', 'Trimestriel'),
+        ('SEMESTRIEL', 'Semestriel'),
+        ('ANNUEL', 'Annuel'),
     ]
 
     UNIT_OPTIONS = [
         ('GNF', 'GNF'),
-        ('Nombre', 'Nombre'),
-        ('Pourcentage', 'Pourcentage'),
-        ('Oui/Non', 'Oui/Non'),
+        ('NOMBRE', 'Nombre'),
+        ('POURCENTAGE', 'Pourcentage'),
+        ('OUI_NON', 'Oui / Non'),
     ]
 
     MODULE_OPTIONS = [
@@ -71,19 +71,19 @@ class Indicator(HistoryBusinessModel):
     name = models.CharField(_("Nom de l’indicateur"), max_length=255)
     description = models.TextField(_("Description / Définition"), blank=True, null=True)
 
-    type = models.CharField(_("Type d'inddicateur"), max_length=50, choices=TYPE_OPTIONS, default='QUANTITATIVE')
+    type = models.CharField(_("Type d'indicateur"), max_length=50, choices=TYPE_OPTIONS, default='QUANTITATIVE')
     unit = models.CharField(_("Unité de mesure"), max_length=50, choices=UNIT_OPTIONS, help_text=_("Ex: Nombre, %, Oui/Non"))
     frequency = models.CharField(
         _("Fréquence de suivi"),
-        max_length=16,
+        max_length=32,
         choices=FREQUENCIES_OPTIONS,
-        default='Mensuel',
+        default='MENSUEL',
     )
 
     target = models.FloatField(_("Final target"), default=1)
     module = models.CharField(_("Source des données"), choices=MODULE_OPTIONS, max_length=255, blank=True, null=True)
     formula = models.CharField(
-        _("Clé de calcul automatique"), max_length=50, blank=True, null=True,
+        _("Clé de calcul automatique"), max_length=64, blank=True, null=True,
         help_text=_("Identifiant logique de la formule (ex : ODP_002, IRI_001)")
     )
     method = models.CharField(max_length=16, choices=METHOD_OPTIONS, default='AUTOMATIQUE')
@@ -233,7 +233,7 @@ class MonitoringSubmission(HistoryModel):
         return f"{self.form_type} | {self.submission_uuid or self.id}"
 
 
-class IndicatorDataSource(HistoryModel):
+class IndicatorDataSource(HistoryBusinessModel):
     """
     Décrit la source et la logique de calcul d’un indicateur ME
     """

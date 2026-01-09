@@ -57,12 +57,13 @@ class IndicatorGQLType(DjangoObjectType):
             "id": ["exact"],
             "code": ["exact", "icontains"],
             "type": ["exact", "icontains"],
-            "category": ["exact"],
+            "category": ["exact", "icontains"],
+            "unit": ["exact", "icontains"],
             "method": ["exact", "icontains"],
             "status": ["exact", "icontains"],
             "module": ["exact", "icontains"],
             "name": ["icontains"],
-            "frequency": ["exact"],
+            "frequency": ["exact", "icontains"],
             "is_active": ["exact"],
         }
 

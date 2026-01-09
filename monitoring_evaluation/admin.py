@@ -63,15 +63,6 @@ class IndicatorDataSourceAdmin(admin.ModelAdmin):
         }),
     )
 
-    formfield_overrides = {
-        models.JSONField: {
-            "widget": JSONEditorWidget(
-                mode="tree",
-                options={"search": True}
-            )
-        }
-    }
-
     def save_model(self, request, obj, form, change):
         obj.save(user=request.user)
 
