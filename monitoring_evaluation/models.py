@@ -194,8 +194,8 @@ class MonitoringLog(HistoryModel):
 
 class MonitoringSubmission(HistoryModel):
     FORM_TYPES = [
-        # ("TMU_TMR", "Transferts Monétaires (Urgence/Régulier)"),
-        # ("AGR", "Activité Génératrice de Revenus"),
+        ("COMMUNICATION_PROGRAMME", "Communication de Programme et Mobilisation Communautaire Mesure 1"),
+        ("FICHE_SESSIONS_COACHING_INDIVIDUEL", "Fiche de suivi des sessions de coaching individuel"),
         ("FICHE_SUIVI_SERE_NAFA", "Fiche de suivi des Sère Nafa"),
         ("CONSTITUTION_SERE_NAFA", "Constitution des Sèrè Nafa"),
         ("FICHE_ENREG_BENEFICIAIRE", "Fiche d'enregistrement des Bénéficiaires"),

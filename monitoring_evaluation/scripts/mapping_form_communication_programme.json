@@ -1,0 +1,706 @@
+[
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "63b45d28-f2d6-4371-99fe-89291bb6eb99",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "__version__",
+      "grievance_field": "json_ext.__version__",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "49b7fcd5-ec05-4360-85b1-327391113fcf",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/download_url",
+      "grievance_field": "json_ext._attachments.download_url",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "394a15e4-e85c-4e25-b8f7-3244c7dda576",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/filename",
+      "grievance_field": "json_ext._attachments.filename",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "d57b410a-19a1-4d5a-a750-3e3e1d461dc2",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/is_deleted",
+      "grievance_field": "json_ext._attachments.is_deleted",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ea018f98-2ceb-4a55-b9a4-a3ecbec698d2",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/media_file_basename",
+      "grievance_field": "json_ext._attachments.media_file_basename",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "37f53925-2f20-4c93-a864-b46395a06bd1",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/mimetype",
+      "grievance_field": "json_ext._attachments.mimetype",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "97d1eaf2-4799-48e2-b42d-4e7248d8dcf5",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/question_xpath",
+      "grievance_field": "json_ext._attachments.question_xpath",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "a89b5cfa-b2d0-4e12-a56a-0033d44a08d3",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_attachments/uid",
+      "grievance_field": "json_ext._attachments.uid",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "1a7dded6-64f0-4a1f-9bc8-4750b8565666",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_geolocation",
+      "grievance_field": "json_ext._geolocation",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "a74fc70d-fd65-4f29-bec1-f86e7914ef44",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_id",
+      "grievance_field": "json_ext._id",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "4822476d-85e4-4152-a830-aed89247e3a3",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_status",
+      "grievance_field": "json_ext._status",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "d5606fca-d23f-47d4-9cb6-4c951028df7b",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_submission_time",
+      "grievance_field": "submitted_at",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "3b456897-4385-4d7f-a3ca-c62e9f0b7d08",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_submitted_by",
+      "grievance_field": "enumerator_username",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "e401e90c-a7da-48fd-ba54-d3237db677ff",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_uuid",
+      "grievance_field": "submission_uuid",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "e3e689df-a0a4-470a-9af4-f23b75ba3e9c",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "_xform_id_string",
+      "grievance_field": "json_ext._xform_id_string",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "797d0a2f-7b3d-4b2f-8fb7-2c6aefdc42e6",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participant/add_participant/group_autre_person/new_participant_contact",
+      "grievance_field": "json_ext.add_participant.add_participant.group_autre_person.new_participant_contact",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "d8e136cc-79ec-4024-b885-e9237bd3b745",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participant/add_participant/group_autre_person/new_participant_fonction",
+      "grievance_field": "json_ext.add_participant.add_participant.group_autre_person.new_participant_fonction",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "b3239b3d-0cfa-4d0e-b2af-c131f253fc52",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participant/add_participant/group_autre_person/new_participant_nom",
+      "grievance_field": "json_ext.add_participant.add_participant.group_autre_person.new_participant_nom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "a1eed86b-a539-451c-a478-3e60320ccb56",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participant/add_participant/group_autre_person/new_participant_prenom",
+      "grievance_field": "json_ext.add_participant.add_participant.group_autre_person.new_participant_prenom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "b11ba592-a98a-4a5f-a732-80675fff2de9",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participant/add_participant/group_autre_person/new_participant_sexe",
+      "grievance_field": "json_ext.add_participant.add_participant.group_autre_person.new_participant_sexe",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "1e6eea47-f219-4963-8f00-de407ef1225b",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/ben_principal_date_naissance",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.ben_principal_date_naissance",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "814bb349-6c75-40de-9250-5450b4a6e0de",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/ben_principal_nom",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.ben_principal_nom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "d37f995e-9491-4c2b-ab94-d585e2727755",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/ben_principal_prenoms",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.ben_principal_prenoms",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "813a9f0b-bccc-49ad-afce-2e2b337f39db",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/ben_principal_type",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.ben_principal_type",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "08a799a0-e89c-4ade-b2bd-3aa3ed94e1e8",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ebaf42d1-771d-4a8b-83be-3b557800be80",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/format_code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.format_code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "8343bb3b-37f7-46ee-aab6-5d970f1daa73",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/seq_1_code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.seq_1_code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "59791f8c-d895-4ecd-bb47-3e4d60d4f66d",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/seq_2_code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.seq_2_code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "34e4dc9b-a31e-4403-80d6-1c7c6e84d4ed",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/seq_3_code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.seq_3_code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "c4e50040-da45-40b2-8b3a-7efd576e1c6d",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/sequence_code_menage",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.sequence_code_menage",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "f8fa2c36-7691-4867-9838-53d65480bdcb",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/supleant_nom",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.supleant_nom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ce026d00-4eb9-4d78-a132-1ce1615ec08a",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/supleant_prenom",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.supleant_prenom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "9306995e-a8d4-48b7-991a-a7a7a8180bf8",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/suppleant_date_naissance",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.suppleant_date_naissance",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "2939f832-c505-4a9c-a7e1-b77215ca045d",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_pip/suppleant_sexe",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_pip.suppleant_sexe",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ee5047b4-7782-4575-90d6-76d7f3495845",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_update/confirmation_suppleant_sexe",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_update.confirmation_suppleant_sexe",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "67f56518-5249-41fd-9a2c-4e6cdac15dc0",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_update/new_ben_datenaissance",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_update.new_ben_datenaissance",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "e031a3bc-896b-42ad-a213-b5c9dc2bf879",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_update/new_numero_tel",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_update.new_numero_tel",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "2e6a59e2-3bf9-478b-8900-3454dead02d4",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_update/new_suppleant_datenaissance",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_update.new_suppleant_datenaissance",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "38340fab-5c9a-45fa-9a80-4bb7b8e91fee",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "add_participants/add_participants/group_beneficiaire/group_update/new_suppleant_sexe",
+      "grievance_field": "json_ext.add_participants.add_participants.group_beneficiaire.group_update.new_suppleant_sexe",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "c56b534a-8107-4718-acc5-638f85f42bed",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "date_auto",
+      "grievance_field": "json_ext.date_auto",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "7c0595eb-d432-4a76-ad8a-8f8322b580ab",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "emplacement",
+      "grievance_field": "json_ext.emplacement",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "e247b855-b9d9-4145-844c-5e0b1e739125",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "end",
+      "grievance_field": "json_ext.end",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "9a577b5d-8b6b-4b6a-92eb-16ea366ab6ac",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "formhub/uuid",
+      "grievance_field": "json_ext.formhub.uuid",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "5e06c5dc-c661-4147-9942-c3e80d2701d5",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_aap_id/aap_code",
+      "grievance_field": "json_ext.group_aap_id.aap_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "232590d5-4e09-487a-b855-6946ebca86d6",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_aap_id/aap_contact",
+      "grievance_field": "json_ext.group_aap_id.aap_contact",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "8c1f668d-4903-44df-9054-71da065d6db2",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_aap_id/aap_nom",
+      "grievance_field": "json_ext.group_aap_id.aap_nom",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "f11fa96c-9a13-4657-b818-e397875e5eef",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_aap_info/aap_contact_confirmation",
+      "grievance_field": "json_ext.group_aap_info.aap_contact_confirmation",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "6a637ae0-0e5e-4d25-a18a-38d9e9cf946e",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_aap_info/aap_nom_confirmation",
+      "grievance_field": "json_ext.group_aap_info.aap_nom_confirmation",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "0b14c500-c22d-48dd-8931-a509bb1f1fc6",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/district",
+      "grievance_field": "json_ext.group_geo.group_district.district",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "22fe919f-2f84-4418-bd9f-db805789ba26",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/district_code",
+      "grievance_field": "json_ext.group_geo.group_district.district_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "a6b19d4f-c5b3-471e-aaf9-9090924d6617",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/prefecture",
+      "grievance_field": "json_ext.group_geo.group_district.prefecture",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "5fd66483-f4db-415c-8bf5-692367730489",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/region",
+      "grievance_field": "json_ext.group_geo.group_district.region",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "953a78d8-2dc2-498f-9a0a-d4126c250d8d",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/secteur",
+      "grievance_field": "json_ext.group_geo.group_district.secteur",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ffc2a59f-f399-4437-ab72-d6a4a561834a",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/secteur_code",
+      "grievance_field": "location_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "cda67549-5323-4217-93a8-bc9290dc7f7a",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/group_district/sous_prefecture",
+      "grievance_field": "json_ext.group_geo.group_district.sous_prefecture",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "9e4a7a3c-2da8-4bbd-9b10-a818adacf143",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/prefecture_code",
+      "grievance_field": "json_ext.group_geo.prefecture_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "ec5f5f64-99b7-49a5-b49f-e15d39a0ff5c",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/region_code",
+      "grievance_field": "json_ext.group_geo.region_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "db3df1d3-fbd3-4ece-b388-bc1681896618",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "group_geo/sous_prefecture_code",
+      "grievance_field": "json_ext.group_geo.sous_prefecture_code",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "c7de7176-dbae-4d12-918b-e7d8708f8c22",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "heure_auto",
+      "grievance_field": "json_ext.heure_auto",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "4714fc7d-cf3b-40cd-9dcb-e269bd96656c",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "meta/audit",
+      "grievance_field": "json_ext.meta.audit",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "53019820-6330-4394-9fd0-2c44a6c1b565",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "meta/instanceID",
+      "grievance_field": "json_ext.meta.instanceID",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "6e13584b-6621-45b1-b57b-51749d6aef0f",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "meta/rootUuid",
+      "grievance_field": "json_ext.meta.rootUuid",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "566acac7-e0f0-42d9-b1ba-c811a7ae7e94",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "selection_autre_membre",
+      "grievance_field": "json_ext.selection_autre_membre",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  },
+  {
+    "model": "kobo_connect.kobofieldmapping",
+    "pk": "a7675099-42cb-42b9-8d93-a3e9c8448cb5",
+    "fields": {
+      "kobo_form": "dc10afdf-ace8-4cae-97c4-d950b960b7f8",
+      "kobo_field": "start",
+      "grievance_field": "json_ext.start",
+      "user_created": "30415d40-5925-4fb4-9fa0-0ed29dbae460",
+      "user_updated": "30415d40-5925-4fb4-9fa0-0ed29dbae460"
+    }
+  }
+]

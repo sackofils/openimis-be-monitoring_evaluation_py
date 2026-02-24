@@ -160,3 +160,8 @@ if __name__ == "__main__":
 
 # Charger dans Django:
 # python manage.py loaddata mapping_form_coaching.json
+
+#python manage.py loaddata ../data/kobo_ticket_mapping_bundle/mapping_form_coaching_individuel.json
+#python manage.py loaddata ../data/kobo_ticket_mapping_bundle/mapping_form_communication_programme.json
+
+

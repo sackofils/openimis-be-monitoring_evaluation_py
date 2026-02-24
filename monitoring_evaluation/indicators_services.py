@@ -525,136 +525,207 @@ def calc_PIP_013(indicator, start, end):
 
 def calc_PIP_014(indicator, start, end):
     """
-    ODP_SERE_002 – Taux de Sèrè Nafa fonctionnant de manière satisfaisante
+    PIP_014 – Taux de Sèrè Nafa fonctionnant de manière satisfaisante
 
-    Source : Fiche de suivi des Sèrès Nafa
+    Définition stricte d’un Sèrè Nafa "satisfaisant" :
+
+    1. applicationReglementInterieur = Oui
+    2. montant_total_epargne > 0
+    3. taux_remboursement >= 70%
+
+    Où :
+        taux_remboursement =
+            montant_rembourcement / montant_fond_credis
+
+    Formule de l’indicateur :
+        (Nombre groupes satisfaisants / Nombre groupes suivis) × 100
+
+    Source : FICHE_SUIVI_SERE_NAFA
     Fréquence : Mensuelle
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA"
-        # submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA",
+        #submitted_at__range=(start, end),
     )
 
-    if not qs.exists():
-        _save_value(indicator, start, end, 0, source="Fiche de suivi des Sèrès Nafa")
-        return
+    # Ensemble des groupes distincts suivis
+    groupes_total = set()
 
-    # -------------------------------
-    # DÉNOMINATEUR : Sèrè Nafa suivis
-    # -------------------------------
-    total_sere = (
-        qs
-        .distinct()
-        .count()
-    )
+    # Ensemble des groupes satisfaisants
+    groupes_satisfaisants = set()
 
-    if total_sere == 0:
-        _save_value(indicator, start, end, 0, source="Fiche de suivi des Sèrès Nafa")
-        return
+    for sub in qs:
+        data = sub.json_ext
 
-    # ------------------------------------------------
-    # NUMÉRATEUR : Sèrè Nafa fonctionnant correctement
-    # ------------------------------------------------
-    functioning_sere = (
-        qs.filter(
-            # Critère 1 : règlement intérieur respecté
-            json_ext__reglement_sere__reglementInterieur__icontains=["Oui"],
-            # Critère 2 : participation effective
-            json_ext__groupe_presence__nbre_homme__gt=0,
-        )
-        .distinct()
-        .count()
-    )
+        # ==============================
+        # 1. Identification du groupe
+        # ==============================
+        groupe_identite = data.get("groupe_identite", {})
+        preload = groupe_identite.get("groupe_ajoute_preload", {})
 
-    # -------------------------------
-    # TAUX (%)
-    # -------------------------------
-    taux = round((functioning_sere / total_sere) * 100, 2)
+        code_sere = preload.get("sequence_code_sere")
+
+        if not code_sere:
+            continue
+
+        code_sere = str(code_sere).strip().upper()
+        groupes_total.add(code_sere)
+
+        # ==============================
+        # 2. Critère 1 – Règlement appliqué
+        # ==============================
+        reglement = data.get("reglement_sere", {})
+        application = reglement.get("applicationReglementInterieur", [])
+
+        if isinstance(application, str):
+            application = [application]
+
+        reglement_ok = "Oui" in application
+
+        # ==============================
+        # 3. Critère 2 – Épargne positive
+        # ==============================
+        groupe_epargne = data.get("groupe_epargne", {})
+
+        montant_total = groupe_epargne.get("montant_total_epargne", 0)
+
+        try:
+            montant_total = float(montant_total)
+        except (TypeError, ValueError):
+            montant_total = 0
+
+        epargne_ok = montant_total > 0
+
+        # ==============================
+        # 4. Critère 3 – Taux remboursement >= 70%
+        # ==============================
+        montant_remboursement = groupe_epargne.get("montant_rembourcement", 0)
+        montant_fond_credis = groupe_epargne.get("montant_fond_credis", 0)
+
+        try:
+            montant_remboursement = float(montant_remboursement)
+        except (TypeError, ValueError):
+            montant_remboursement = 0
+
+        try:
+            montant_fond_credis = float(montant_fond_credis)
+        except (TypeError, ValueError):
+            montant_fond_credis = 0
+
+        if montant_fond_credis > 0:
+            taux_remboursement = montant_remboursement / montant_fond_credis
+        else:
+            taux_remboursement = 0
+
+        remboursement_ok = taux_remboursement >= 0.70
+
+        # ==============================
+        # 5. Condition finale stricte
+        # ==============================
+        if reglement_ok and epargne_ok and remboursement_ok:
+            groupes_satisfaisants.add(code_sere)
+
+    total = len(groupes_total)
+    satisfaisants = len(groupes_satisfaisants)
+
+    if total == 0:
+        taux = 0
+    else:
+        taux = round((satisfaisants / total) * 100, 2)
 
     _save_value(
         indicator=indicator,
         start=start,
         end=end,
         value=taux,
-        source="Fiche de suivi des Sèrès Nafa",
+        source="Fiche de suivi des Sèrè Nafa",
     )
+
 
 def calc_PIP_015(indicator, start, end):
     """
-    ODP_SERE_003 – Épargne moyenne collectée par membre des Sèrès Nafa
+    PIP_015 – Épargne moyenne collectée par membre des Sèrès Nafa
 
-    Source : Fiche de suivi des Sèrès Nafa
+    Définition :
+        Épargne moyenne = Somme totale épargne / Somme totale membres
+
+    Où :
+        montant_total_epargne → groupe_epargne.montant_total_epargne
+        nombre_part → groupe_epargne.nombre_part
+
+    Important :
+        - On agrège toutes les épargnes
+        - On agrège tous les membres
+        - On calcule ensuite une moyenne globale pondérée
+
+    Source : FICHE_SUIVI_SERE_NAFA
     Fréquence : Mensuelle
-    Unité : GNF
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA"
-        #submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA",
+        # submitted_at__range=(start, end),
     )
-
-    if not qs.exists():
-        _save_value(indicator, start, end, 0, source="Fiche de suivi des Sèrès Nafa")
-        return
 
     total_epargne = 0
     total_membres = 0
 
     for sub in qs:
-        epargne = sub.json_ext.get("groupe_epargne", {}).get(
-            "montant_total_epargne", 0
-        )
-        membres = sub.json_ext.get(
-            "groupe_identite", {}
-        ).get(
-            "groupe_ajoute_preload", {}
-        ).get("sere_nbre", 0)
+        data = sub.json_ext
+        groupe_epargne = data.get("groupe_epargne", {})
+
+        montant_total = groupe_epargne.get("montant_total_epargne", 0)
+        nombre_part = groupe_epargne.get("nombre_part", 0)
+
+        # Conversion sécurisée
+        try:
+            montant_total = float(montant_total)
+        except (TypeError, ValueError):
+            montant_total = 0
 
         try:
-            epargne = float(epargne)
+            nombre_part = float(nombre_part)
         except (TypeError, ValueError):
-            epargne = 0
+            nombre_part = 0
 
-        try:
-            membres = int(float(membres))
-        except (TypeError, ValueError):
-            membres = 0
-
-        if membres > 0:
-            total_epargne += epargne
-            total_membres += membres
+        # On ne compte que les groupes valides
+        if montant_total > 0 and nombre_part > 0:
+            total_epargne += montant_total
+            total_membres += nombre_part
 
     if total_membres == 0:
-        value = 0
+        moyenne = 0
     else:
-        value = round(total_epargne / total_membres, 2)
+        moyenne = round(total_epargne / total_membres, 2)
 
     _save_value(
         indicator=indicator,
         start=start,
         end=end,
-        value=value,
+        value=moyenne,
         source="Fiche de suivi des Sèrès Nafa",
     )
 
+
 def calc_PIP_016(indicator, start, end):
     """
-    ODP_SERE_004 – Épargne cumulée par Sèrè Nafa
+    PIP_016 – Épargne cumulée par Sèrè Nafa
+
+    Définition :
+        Somme des montants d’épargne réellement déclarés
+        par les groupes Sèrè Nafa sur la période.
 
     Formule :
-    Épargne cumulée =
-    (Nombre de membres × 80 %) ×
-    Montant d’une part par semaine ×
-    Nombre de semaines (cycle de 9 mois = 36)
+        PIP_016 = Somme(montant_total_epargne)
 
+    Source : FICHE_SUIVI_SERE_NAFA
     Fréquence : Trimestrielle
-    Source : Fiche de suivi des Sèrès Nafa
     """
 
     qs = MonitoringSubmission.objects.filter(
-        form_type="FICHE_SUIVI_SERE_NAFA"
-        #submitted_at__range=(start, end),
+        form_type="FICHE_SUIVI_SERE_NAFA",
+        # submitted_at__range=(start, end),
     )
 
     if not qs.exists():
@@ -667,53 +738,31 @@ def calc_PIP_016(indicator, start, end):
         )
         return
 
-    TOTAL_WEEKS = 36
-    PARTICIPATION_RATE = 0.8
-
-    total_epargne_cumulee = 0
+    total_epargne = 0
 
     for sub in qs:
-        # Nombre de membres du Sèrè Nafa
-        membres = sub.json_ext.get(
-            "groupe_identite", {}
-        ).get(
-            "groupe_ajoute_preload", {}
-        ).get("sere_nbre", 0)
-
-        # Montant d'une part par semaine
-        valeur_part = sub.json_ext.get(
-            "groupe_epargne", {}
-        ).get("valeur_epargne", 0)
-
-        try:
-            membres = int(float(membres))
-        except (TypeError, ValueError):
-            membres = 0
-
-        try:
-            valeur_part = float(valeur_part)
-        except (TypeError, ValueError):
-            valeur_part = 0
-
-        if membres <= 0 or valeur_part <= 0:
-            continue
-
-        epargne_groupe = (
-            membres
-            * PARTICIPATION_RATE
-            * valeur_part
-            * TOTAL_WEEKS
+        montant = (
+            sub.json_ext
+            .get("groupe_epargne", {})
+            .get("montant_total_epargne", 0)
         )
 
-        total_epargne_cumulee += epargne_groupe
+        try:
+            montant = float(montant)
+        except (TypeError, ValueError):
+            montant = 0
+
+        if montant > 0:
+            total_epargne += montant
 
     _save_value(
         indicator=indicator,
         start=start,
         end=end,
-        value=round(total_epargne_cumulee, 2),
+        value=round(total_epargne, 2),
         source="Fiche de suivi des Sèrès Nafa",
     )
+
 
 def calc_PIP_017(indicator, start, end):
     """
@@ -835,6 +884,309 @@ def calc_PIP_018(indicator, start, end):
         source="Fiche de suivi des Sèrès Nafa",
     )
 
+def calc_PIP_025(indicator, start, end):
+    """
+    PIP_025 – Taux de bénéficiaires ayant diversifié
+    ses moyens de subsistance
+
+    Source : Fiche de suivi des sessions de coaching individuel
+    Fréquence : Mensuelle
+
+    Formule :
+    (Nombre distinct bénéficiaires avec revenus_diversifie = Oui)
+    /
+    (Nombre distinct bénéficiaires total)
+    × 100
+    """
+
+    qs = MonitoringSubmission.objects.filter(
+        form_type="FICHE_SESSIONS_COACHING_INDIVIDUEL",
+        #submitted_at__range=(start, end),
+    )
+
+    if not qs.exists():
+        _save_value(
+            indicator=indicator,
+            start=start,
+            end=end,
+            value=0,
+            source="Fiche de suivi des sessions de coaching individuel",
+        )
+        return
+
+    total_beneficiaries = set()
+    diversified_beneficiaries = set()
+
+    for sub in qs:
+        suivi_ind = sub.json_ext.get("suiviIndividuel", {})
+        suivi_tech = sub.json_ext.get("suiviTechniqueProductive", {})
+
+        code_menage = suivi_ind.get("codeMenage")
+
+        if not code_menage:
+            continue
+
+        code_menage = str(code_menage).strip().upper()
+
+        total_beneficiaries.add(code_menage)
+
+        revenus_diversifie = suivi_tech.get("revenus_diversifie", [])
+
+        if isinstance(revenus_diversifie, str):
+            revenus_diversifie = [revenus_diversifie]
+
+        if "Oui" in revenus_diversifie:
+            diversified_beneficiaries.add(code_menage)
+
+    total = len(total_beneficiaries)
+    diversified = len(diversified_beneficiaries)
+
+    if total == 0:
+        taux = 0
+    else:
+        taux = round((diversified / total) * 100, 2)
+
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=taux,
+        source="Fiche de suivi des sessions de coaching individuel",
+    )
+
+
+def calc_PIP_026(indicator, start, end):
+    """
+    PIP_026 – Nombre de bénéficiaires ayant bénéficié
+    de séances de coaching individuel
+
+    Fréquence : Mensuel
+    Source : Fiche de suivi des sessions de coaching individuel
+
+    Logique :
+    Compte le nombre DISTINCT de codeMenage
+    sur la période.
+    """
+
+    qs = MonitoringSubmission.objects.filter(
+        form_type="FICHE_SESSIONS_COACHING_INDIVIDUEL",
+        #submitted_at__range=(start, end),
+    )
+
+    if not qs.exists():
+        _save_value(
+            indicator=indicator,
+            start=start,
+            end=end,
+            value=0,
+            source="Fiche de suivi des sessions de coaching individuel",
+        )
+        return
+
+    unique_beneficiaries = set()
+
+    for sub in qs:
+        suivi = sub.json_ext.get("suiviIndividuel", {})
+
+        code_menage = suivi.get("codeMenage")
+
+        if not code_menage:
+            continue
+
+        # Nettoyage robuste
+        code_menage = str(code_menage).strip().upper()
+
+        if code_menage:
+            unique_beneficiaries.add(code_menage)
+
+    total = len(unique_beneficiaries)
+
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=total,
+        source="Fiche de suivi des sessions de coaching individuel",
+    )
+
+def calc_PIP_029(indicator, start, end):
+    """
+    PIP_029 – Nombre de bénéficiaires ayant développé
+    ou renforcé une AGR
+
+    Source : Fiche de suivi des sessions de coaching individuel
+    Fréquence : Mensuelle
+
+    Logique :
+    Compte le nombre DISTINCT de codeMenage
+    ayant agr_creer = Oui OU agr_existant = Oui
+    """
+
+    qs = MonitoringSubmission.objects.filter(
+        form_type="FICHE_SESSIONS_COACHING_INDIVIDUEL",
+        #submitted_at__range=(start, end),
+    )
+
+    if not qs.exists():
+        _save_value(
+            indicator=indicator,
+            start=start,
+            end=end,
+            value=0,
+            source="Fiche de suivi des sessions de coaching individuel",
+        )
+        return
+
+    unique_beneficiaries = set()
+
+    for sub in qs:
+        suivi_ind = sub.json_ext.get("suiviIndividuel", {})
+        suivi_tech = sub.json_ext.get("suiviTechniqueProductive", {})
+
+        code_menage = suivi_ind.get("codeMenage")
+
+        if not code_menage:
+            continue
+
+        # Nettoyage
+        code_menage = str(code_menage).strip().upper()
+
+        agr_creer = suivi_tech.get("agr_creer", [])
+        agr_existant = suivi_tech.get("agr_existant", [])
+
+        # Normalisation (au cas où ce n’est pas une liste)
+        if isinstance(agr_creer, str):
+            agr_creer = [agr_creer]
+
+        if isinstance(agr_existant, str):
+            agr_existant = [agr_existant]
+
+        condition = (
+            "Oui" in agr_creer
+            or "Oui" in agr_existant
+        )
+
+        if condition:
+            unique_beneficiaries.add(code_menage)
+
+    total = len(unique_beneficiaries)
+
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=total,
+        source="Fiche de suivi des sessions de coaching individuel",
+    )
+
+def calc_PIP_028(indicator, start, end):
+    """
+    PIP_028 – Taux de bénéficiaires présents
+    aux séances de communication de programme
+
+    Formule :
+    (Total bénéficiaires présents / Total bénéficiaires prévus) × 100
+
+
+    qs = MonitoringSubmission.objects.filter(
+        form_type="COMMUNICATION_PROGRAMME",
+        #submitted_at__range=(start, end),
+    )
+
+    total_prevus = 0
+    total_presents = 0
+
+    for sub in qs:
+        data = sub.json_ext
+
+        prevus = data.get("participants_prevus", 0)
+        presents = data.get("participants_total", 0)
+
+        try:
+            prevus = float(prevus)
+        except (TypeError, ValueError):
+            prevus = 0
+
+        try:
+            presents = float(presents)
+        except (TypeError, ValueError):
+            presents = 0
+
+        total_prevus += prevus
+        total_presents += presents
+
+    if total_prevus == 0:
+        taux = 0
+    else:
+        taux = round((total_presents / total_prevus) * 100, 2)
+
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=taux,
+        source="Communication de Programme et Mobilisation Communautaire",
+    )
+    """
+    pass
+
+def calc_PIP_027(indicator, start, end):
+    """
+    PIP_027 – Taux de bénéficiaires satisfaits
+    de l’accompagnement reçu
+
+    Formule :
+    (Nombre bénéficiaires satisfaits / Nombre bénéficiaires ayant répondu) × 100
+
+
+    qs = MonitoringSubmission.objects.filter(
+        form_type="FICHE_SESSIONS_COACHING_INDIVIDUEL",
+        # submitted_at__range=(start, end),
+    )
+
+    total_respondents = set()
+    satisfied_beneficiaries = set()
+
+    for sub in qs:
+        suivi_ind = sub.json_ext.get("suiviIndividuel", {})
+        evaluation = sub.json_ext.get("evaluation", {})
+
+        code_menage = suivi_ind.get("codeMenage")
+
+        if not code_menage:
+            continue
+
+        code_menage = str(code_menage).strip().upper()
+
+        satisfaction = evaluation.get("niveau_satisfaction", [])
+
+        if isinstance(satisfaction, str):
+            satisfaction = [satisfaction]
+
+        if satisfaction:
+            total_respondents.add(code_menage)
+
+            if any(val in ["Satisfait", "Très satisfait", "Oui"] for val in satisfaction):
+                satisfied_beneficiaries.add(code_menage)
+
+    total = len(total_respondents)
+    satisfied = len(satisfied_beneficiaries)
+
+    if total == 0:
+        taux = 0
+    else:
+        taux = round((satisfied / total) * 100, 2)
+
+    _save_value(
+        indicator=indicator,
+        start=start,
+        end=end,
+        value=taux,
+        source="Accompagnement – Coaching individuel/groupe",
+    )
+    """
+    pass
+
 
 FORMULAS = {
     "IRI_012": calc_IRI_012,
@@ -850,6 +1202,10 @@ FORMULAS = {
     "PIP_16": calc_PIP_016,
     "PIP_17": calc_PIP_017,
     "PIP_18": calc_PIP_018,
+    "PIP_26": calc_PIP_026,
+    "PIP_27": calc_PIP_027,
+    "PIP_28": calc_PIP_028,
+    "PIP_29": calc_PIP_029,
 }
 
 @transaction.atomic

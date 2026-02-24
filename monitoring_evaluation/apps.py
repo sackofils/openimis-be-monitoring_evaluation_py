@@ -4,17 +4,19 @@ MODULE_NAME = "monitoring_evaluation"
 
 DEFAULT_CFG = {
     # Permissions associées aux queries GraphQL
-    "gql_query_forms_perms": ["121805"],
-    "gql_query_tokens_perms": ["121806"],
+    "gql_query_indicators_perms": ["128001"],
 
     # Permissions associées aux mutations GraphQL
-    "gql_mutation_forms_add_perms": ["121807"],
-    "gql_mutation_forms_update_perms": ["121808"],
-    "gql_mutation_forms_delete_perms": ["121809"],
+    "gql_mutation_indicators_add_perms": ["128002"],
+    "gql_mutation_indicators_update_perms": ["128003"],
+    "gql_mutation_indicators_delete_perms": ["128004"],
+    "gql_mutation_indicators_duplicate_perms": ["128005"],
+    "gql_mutation_indicators_recalculate_perms": ["128006"],
 
-    "gql_mutation_tokens_add_perms": ["121809"],
-    "gql_mutation_tokens_update_perms": ["121810"],
-    "gql_mutation_tokens_delete_perms": ["121811"],
+    "gql_mutation_indicators_add_value_perms": ["128007"],
+    "gql_mutation_indicators_edit_value_perms": ["128008"],
+    "gql_mutation_indicators_delete_value_perms": ["128009"],
+    "gql_mutation_indicators_validate_value_perms": ["128010"],
 }
 
 
@@ -23,16 +25,18 @@ class MonitoringEvaluationConfig(AppConfig):
     verbose_name = "Monitoring Evaluation"
 
     # Déclaration des permissions configurables dynamiquement
-    gql_query_forms_perms = []
-    gql_query_tokens_perms = []
+    gql_query_indicators_perms = []
 
-    gql_mutation_forms_add_perms = []
-    gql_mutation_forms_update_perms = []
-    gql_mutation_forms_delete_perms = []
+    gql_mutation_indicators_add_perms = []
+    gql_mutation_indicators_update_perms = []
+    gql_mutation_indicators_delete_perms = []
+    gql_mutation_indicators_duplicate_perms = []
+    gql_mutation_indicators_recalculate_perms = []
 
-    gql_mutation_tokens_add_perms = []
-    gql_mutation_tokens_update_perms = []
-    gql_mutation_tokens_delete_perms = []
+    gql_mutation_indicators_add_value_perms = []
+    gql_mutation_indicators_edit_value_perms = []
+    gql_mutation_indicators_delete_value_perms = []
+    gql_mutation_indicators_validate_value_perms = []
 
     def __load_config(self, cfg):
         """
