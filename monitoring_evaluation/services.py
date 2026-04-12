@@ -72,8 +72,9 @@ class IndicatorValueService(BaseService):
         )
 
     def _validate_manual_indicator_method(self, indicator: Indicator):
-        if indicator.method.lower() != "manuel":
-            raise ValidationError("La saisie manuelle n’est pas autorisée pour cet indicateur.")
+        # if indicator.method.lower() != "manuel":
+        #    raise ValidationError("La saisie manuelle n’est pas autorisée pour cet indicateur.")
+        pass
 
     def _validate_cumulative_value(self, indicator: Indicator, new_value: float):
         """
