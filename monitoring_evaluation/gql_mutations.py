@@ -224,6 +224,7 @@ class DuplicateIndicatorMutation(BaseHistoryModelCreateMutationMixin, BaseMutati
             "code": new_code,
             "name": instance.name,
             "description": instance.description,
+            "category": instance.category,
             "type": instance.type,
             "unit": instance.unit,
             "frequency": instance.frequency,
@@ -418,5 +419,4 @@ class RecalculateIndicatorsMutation(OpenIMISMutation):
 
         count = calculate_indicators_for_period(ps, pe, ctx={"user": user})
         return RecalculateIndicatorsMutation(updated_count=count)
-
 
