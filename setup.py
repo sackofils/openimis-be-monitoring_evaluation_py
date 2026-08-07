@@ -24,7 +24,11 @@ setup(
         'django-db-signals',
         'djangorestframework',
         'openimis-be-core',
-        'openimis-be-individual'
+        'openimis-be-grievance_social_protection',
+        'openimis-be-individual',
+        'openimis-be-location',
+        'openimis-be-payroll',
+        'openimis-be-social_protection',
     ],
     classifiers=[
         'Environment :: Web Environment',

@@ -1,0 +1,20 @@
+name: Module CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop, "release/**", "feature/**"]
+  workflow_dispatch:
+
+jobs:
+  call:
+    uses: openimis/openimis-be_py/.github/workflows/ci_module.yml@develop
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    with:
+      SONAR_PROJECT_KEY: sackofils_openimis-be-monitoring_evaluation_py
+      SONAR_ORGANIZATION: openimis-1
+      SONAR_PROJECT_NAME: openimis-be-monitoring_evaluation_py
+      SONAR_PROJECT_VERSION: "1.0"
+      SONAR_SOURCES: monitoring_evaluation
+      SONAR_EXCLUSIONS: "**/migrations/**,**/tests/**"

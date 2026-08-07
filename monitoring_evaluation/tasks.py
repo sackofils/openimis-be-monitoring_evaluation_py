@@ -1,10 +1,8 @@
 import logging
 from datetime import timedelta
 from django.utils import timezone
-from django.db import transaction
 
-# --- Models internes ---
-from .models import User
+from core.models import User
 from .indicators_services import calculate_me_indicators_for_period
 
 logger = logging.getLogger(__name__)
@@ -20,7 +18,11 @@ def current_quarter_dates():
     today = timezone.now().date()
     q_start_month = ((today.month - 1) // 3) * 3 + 1
     start = today.replace(month=q_start_month, day=1)
-    end = start + timedelta(days=90)  # approx 3 mois
+    if q_start_month == 10:
+        next_quarter = start.replace(year=today.year + 1, month=1)
+    else:
+        next_quarter = start.replace(month=q_start_month + 3)
+    end = next_quarter - timedelta(days=1)
     return start, end
 
 

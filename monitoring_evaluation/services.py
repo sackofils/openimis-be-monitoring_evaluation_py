@@ -1,26 +1,17 @@
-import json
-import uuid
-import datetime
 from datetime import date
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.db.models import Max, Q
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.services import BaseService
 from core.signals import register_service_signal
-from core.models.user import Role, UserRole, InteractiveUser, User
-from core.services.utils import check_authentication as check_authentication, output_exception, \
+from core.services.utils import output_exception, \
     model_representation, output_result_success
-from monitoring_evaluation.models import Indicator, IndicatorValue, MonitoringSubmission
+from monitoring_evaluation.models import Indicator, IndicatorValue
 from monitoring_evaluation.validations import (
     IndicatorValidation,
     IndicatorValueValidation
 )
-from django.contrib.auth import get_user_model
 
-
-User = get_user_model()
 
 class IndicatorService(BaseService):
     OBJECT_TYPE = Indicator
@@ -72,9 +63,10 @@ class IndicatorValueService(BaseService):
         )
 
     def _validate_manual_indicator_method(self, indicator: Indicator):
-        # if indicator.method.lower() != "manuel":
-        #    raise ValidationError("La saisie manuelle n’est pas autorisée pour cet indicateur.")
-        pass
+        if indicator.method != 'MANUEL':
+            raise ValidationError(
+                'La saisie manuelle est reservee aux indicateurs manuels.'
+            )
 
     def _validate_cumulative_value(self, indicator: Indicator, new_value: float):
         """
@@ -113,10 +105,10 @@ class IndicatorValueService(BaseService):
                 self._validate_cumulative_value(indicator, value)
 
                 # Conversion dates ISO → Date field
-                if "period_start" in obj_data:
-                    obj_data["period_start"] = date.fromisoformat(obj_data["period_start"])
-                if "period_end" in obj_data:
-                    obj_data["period_end"] = date.fromisoformat(obj_data["period_end"])
+                if isinstance(obj_data.get('period_start'), str):
+                    obj_data['period_start'] = date.fromisoformat(obj_data['period_start'])
+                if isinstance(obj_data.get('period_end'), str):
+                    obj_data['period_end'] = date.fromisoformat(obj_data['period_end'])
 
                 # Créer via BaseService
                 return super().create(obj_data)
@@ -140,12 +132,14 @@ class IndicatorValueService(BaseService):
                 instance = IndicatorValue.objects.filter(id=instance_id).first()
                 if not instance:
                     raise ValidationError("Valeur introuvable")
-
                 indicator = instance.indicator
+                self._validate_manual_indicator_method(indicator)
+                if 'value' in obj_data:
+                    self._validate_cumulative_value(indicator, obj_data.get('value'))
 
-                #if "value" in obj_data:
-                #    new_value = obj_data.get("value")
-                #    self._validate_cumulative_value(indicator, new_value)
+                for field in ('period_start', 'period_end'):
+                    if isinstance(obj_data.get(field), str):
+                        obj_data[field] = date.fromisoformat(obj_data[field])
 
                 return super().update(obj_data)
 

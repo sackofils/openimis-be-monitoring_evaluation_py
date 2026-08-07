@@ -1,11 +1,8 @@
-import re
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
-from django.contrib.contenttypes.models import ContentType
 
-from core.models import User
-from core.validation import BaseModelValidation, ObjectExistsValidationMixin
+from core.validation import BaseModelValidation
 from monitoring_evaluation.models import Indicator, IndicatorValue
 
 
@@ -27,15 +24,12 @@ class IndicatorValidation(BaseModelValidation):
 
     @classmethod
     def validate_update(cls, user, **data):
-        errors = []
-
-        #unique_code_errors = validate_indicator_unique_code(data)
-        #for error in unique_code_errors:
-        #    errors.append(ValidationError(error, code='unique_code_error'))
-
+        errors = [
+            ValidationError(error, code='unique_code_error')
+            for error in validate_indicator_unique_code(data)
+        ]
         if errors:
             raise ValidationError(errors)
-
         super().validate_update(user, **data)
 
 
@@ -48,9 +42,9 @@ def validate_indicator_unique_code(data):
 
     _queryset = Indicator.objects.filter(code=code)
     if id:
-        _queryset.exclude(id=id)
+        _queryset = _queryset.exclude(id=id)
     if _queryset.exists():
-        return [{"message": _("validations.InddicatorValidation.validate_indicator_unique_code") % {"code": code}}]
+        return [{"message": _("Un indicateur avec le code %(code)s existe deja.") % {"code": code}}]
     return []
 
 class IndicatorValueValidation(BaseModelValidation):
@@ -104,8 +98,6 @@ class IndicatorValueValidation(BaseModelValidation):
         """
         Validation métier avant de marquer une valeur comme 'validated'.
         """
-        #if not user.has_perm("monitoring_evaluation.change_indicatorvalue"):
-        #    raise ValidationError(_("Unauthorized"))
 
         value_id = data.get("id")
         if not value_id:

@@ -6,57 +6,17 @@ from datetime import date
 from core.gql.gql_mutations.base_mutation import BaseHistoryModelCreateMutationMixin, BaseMutation, \
     BaseHistoryModelUpdateMutationMixin, BaseHistoryModelDeleteMutationMixin
 from core.schema import OpenIMISMutation
-from .models import Indicator, IndicatorValue, MonitoringLog
-from django.db import transaction
+from .apps import MonitoringEvaluationConfig
+from .models import Indicator, IndicatorValue
 
-from django.db.models import Count, Sum, Q
-from core.models import User
-#from .indicators_services import _FORMULAS, compute_indicator_value, calculate_indicators_for_period
 from .services import IndicatorService, IndicatorValueService
 from django.core.exceptions import ValidationError
 
 
 
-@transaction.atomic
-def calculate_indicators_for_period(period_start: date, period_end: date, ctx=None) -> int:
-    """
-    Calcule tous les indicateurs automatiques actifs pour une période donnée
-    et consigne l'exécution dans le journal MonitoringLog.
-    """
-    user = ctx.get("user") if ctx else None
-    log = MonitoringLog.objects.create(
-        period_start=period_start,
-        period_end=period_end,
-        executed_by=user,
-        success=True,
-        indicators_count=0,
-    )
-
-    indicators = Indicator.objects.filter(is_automatic=True, is_active=True)
-    count = 0
-    errors = []
-
-    for ind in indicators:
-        try:
-            defaults = compute_indicator_value(ind, period_start, period_end, ctx)
-            IndicatorValue.objects.update_or_create(
-                indicator=ind,
-                period_start=period_start,
-                period_end=period_end,
-                defaults={**defaults, "validated": False},
-            )
-            count += 1
-        except Exception as e:
-            errors.append(f"{ind.code}: {str(e)}")
-
-    # mise à jour du log
-    log.indicators_count = count
-    if errors:
-        log.success = False
-        log.error_details = "\n".join(errors)
-    log.save(user=user if user else None)
-
-    return count
+def _require_permissions(user, permissions):
+    if not user.has_perms(permissions):
+        raise PermissionDenied(_('Unauthorized'))
 
 
 # ========================================
@@ -77,7 +37,6 @@ class CreateIndicatorInput(OpenIMISMutation.Input):
     method = graphene.String()
     category = graphene.String()
     formula = graphene.String()
-    calculation_method = graphene.String()
     is_automatic = graphene.Boolean(default_value=False)
     is_active = graphene.Boolean(default_value=True)
 
@@ -92,10 +51,11 @@ class CreateIndicatorMutation(BaseHistoryModelCreateMutationMixin, BaseMutation)
     @classmethod
     def _validate_mutation(cls, user, **data):
         super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_add_perms)
 
     @classmethod
     def _mutate(cls, user, **data):
-        client_mutation_id = data.pop('client_mutation_id')
+        data.pop('client_mutation_id')
         if "client_mutation_label" in data:
             data.pop('client_mutation_label')
 
@@ -144,13 +104,12 @@ class UpdateIndicatorMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation)
 
     @classmethod
     def _validate_mutation(cls, user, **data):
-        #if not user.has_perm("monitoring_evaluation.change_indicator"):
-        #    raise PermissionDenied(_("Unauthorized"))
         super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_update_perms)
 
     @classmethod
     def _mutate(cls, user, **data):
-        client_mutation_id = data.pop("client_mutation_id", None)
+        data.pop("client_mutation_id", None)
         if "client_mutation_label" in data:
             data.pop("client_mutation_label")
 
@@ -178,6 +137,20 @@ class DeleteIndicatorMutation(BaseHistoryModelDeleteMutationMixin, BaseMutation)
     class Input(DeleteIndicatorInput):
         pass
 
+    @classmethod
+    def _validate_mutation(cls, user, **data):
+        super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_delete_perms)
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        data = dict(data)
+        data.pop('client_mutation_id', None)
+        data.pop('client_mutation_label', None)
+        data['user'] = user
+        response = IndicatorService(user).delete(data)
+        return None if response.get('success') else response
+
 
 class DuplicateIndicatorInput(OpenIMISMutation.Input):
     id = graphene.String(required=True)
@@ -198,14 +171,13 @@ class DuplicateIndicatorMutation(BaseHistoryModelCreateMutationMixin, BaseMutati
 
     @classmethod
     def _validate_mutation(cls, user, **data):
-        #if not user.has_perm("monitoring_evaluation.add_indicator"):
-        #    raise PermissionDenied(_("Unauthorized"))
         super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_duplicate_perms)
 
     @classmethod
     def _mutate(cls, user, **data):
         # Extraction clientMutationId et label
-        client_mutation_id = data.pop("client_mutation_id", None)
+        data.pop("client_mutation_id", None)
         if "client_mutation_label" in data:
             data.pop("client_mutation_label")
 
@@ -292,11 +264,12 @@ class CreateManualIndicatorValueMutation(BaseHistoryModelCreateMutationMixin, Ba
     def _validate_mutation(cls, user, **data):
         # Validation générique + rules via BaseModelValidation
         super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_add_value_perms)
 
     @classmethod
     def _mutate(cls, user, **data):
         # extraction clientMutationId / label
-        client_mutation_id = data.pop("client_mutation_id", None)
+        data.pop("client_mutation_id", None)
         if "client_mutation_label" in data:
             data.pop("client_mutation_label")
 
@@ -305,8 +278,6 @@ class CreateManualIndicatorValueMutation(BaseHistoryModelCreateMutationMixin, Ba
 
         if not response.get("success"):
             return response  # géré par middleware openIMIS
-
-        # iv = response["data"]
         return None
 
 class UpdateManualIndicatorValueMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation):
@@ -323,8 +294,13 @@ class UpdateManualIndicatorValueMutation(BaseHistoryModelUpdateMutationMixin, Ba
         pass
 
     @classmethod
+    def _validate_mutation(cls, user, **data):
+        super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_edit_value_perms)
+
+    @classmethod
     def _mutate(cls, user, **data):
-        client_mutation_id = data.pop("client_mutation_id", None)
+        data.pop("client_mutation_id", None)
         if "client_mutation_label" in data:
             data.pop("client_mutation_label")
 
@@ -333,12 +309,6 @@ class UpdateManualIndicatorValueMutation(BaseHistoryModelUpdateMutationMixin, Ba
 
         if not response.get("success"):
             return response
-
-        # iv = response["data"]
-        # return UpdateManualIndicatorValueMutation(
-        #    value=iv.get("value"),
-        #    client_mutation_id=client_mutation_id,
-        #)
 
 class DeleteManualIndicatorValueInput(OpenIMISMutation.Input):
     id = graphene.ID(required=True)
@@ -356,6 +326,20 @@ class DeleteManualIndicatorValueMutation(BaseHistoryModelDeleteMutationMixin, Ba
 
     class Input(DeleteManualIndicatorValueInput):
         pass
+
+    @classmethod
+    def _validate_mutation(cls, user, **data):
+        super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_delete_value_perms)
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        data = dict(data)
+        data.pop('client_mutation_id', None)
+        data.pop('client_mutation_label', None)
+        data['user'] = user
+        response = IndicatorValueService(user).delete(data)
+        return None if response.get('success') else response
 
 
 class ValidateManualIndicatorValueInput(OpenIMISMutation.Input):
@@ -375,8 +359,13 @@ class ValidateManualIndicatorValueMutation(BaseHistoryModelCreateMutationMixin, 
         pass
 
     @classmethod
+    def _validate_mutation(cls, user, **data):
+        super()._validate_mutation(user, **data)
+        _require_permissions(user, MonitoringEvaluationConfig.gql_mutation_indicators_validate_value_perms)
+
+    @classmethod
     def _mutate(cls, user, **data):
-        client_mutation_id = data.pop("client_mutation_id", None)
+        data.pop("client_mutation_id", None)
         if "client_mutation_label" in data:
             data.pop("client_mutation_label")
 
@@ -387,11 +376,6 @@ class ValidateManualIndicatorValueMutation(BaseHistoryModelCreateMutationMixin, 
             return response
 
         return None
-        #iv = response["data"]
-        #return ValidateManualIndicatorValueMutation(
-        #    value=iv.get("value"),
-        #    client_mutation_id=client_mutation_id,
-        #)
 
 # ========================================
 # Recalcul automatique des indicateurs
@@ -411,12 +395,14 @@ class RecalculateIndicatorsMutation(OpenIMISMutation):
     @classmethod
     def mutate(cls, root, info, **data):
         user = info.context.user
-        if not user.has_perms('monitoring_evaluation.change_indicatorvalue'):
+        if not user.has_perms(MonitoringEvaluationConfig.gql_mutation_indicators_recalculate_perms):
             raise PermissionDenied(_("Unauthorized"))
 
         ps = date.fromisoformat(data["period_start"])
         pe = date.fromisoformat(data["period_end"])
 
-        count = calculate_indicators_for_period(ps, pe, ctx={"user": user})
+        from .indicators_services import calculate_me_indicators_for_period
+
+        count = calculate_me_indicators_for_period(ps, pe, user=user)
         return RecalculateIndicatorsMutation(updated_count=count)
 

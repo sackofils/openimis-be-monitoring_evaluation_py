@@ -1,17 +1,15 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer
 from django.utils.translation import gettext_lazy as _
+from django.db import models
 
 from core.schema import OrderedDjangoFilterConnectionField
-from django.contrib.auth.models import AnonymousUser
-from core.utils import append_validity_filter
 from django.core.exceptions import PermissionDenied
-import graphene_django_optimizer as gql_optimizer
 
-from .apps import MODULE_NAME
 
-# Import des queries du module
-from .gql_queries import *
+from .apps import MonitoringEvaluationConfig
+from .models import Indicator, IndicatorValue, MonitoringLog
+from .gql_queries import IndicatorGQLType, IndicatorValueGQLType, MonitoringLogGQLType
 
 # Import des mutations du module
 from .gql_mutations import (
@@ -60,7 +58,7 @@ class Query(graphene.ObjectType):
 
     def resolve_indicators(self, info, **kwargs):
         user = info.context.user
-        if not user.is_authenticated:
+        if not user.has_perms(MonitoringEvaluationConfig.gql_query_indicators_perms):
             raise PermissionDenied(_("Vous devez être connecté."))
 
         qs = Indicator.objects.all()
@@ -84,7 +82,7 @@ class Query(graphene.ObjectType):
 
     def resolve_indicator_values(self, info, **kwargs):
         user = info.context.user
-        if not user.is_authenticated:
+        if not user.has_perms(MonitoringEvaluationConfig.gql_query_indicators_perms):
             raise PermissionDenied(_("Authentification requise."))
 
         qs = IndicatorValue.objects.select_related("indicator")
@@ -113,7 +111,7 @@ class Query(graphene.ObjectType):
 
     def resolve_monitoring_logs(self, info, **kwargs):
         user = info.context.user
-        if not user.is_authenticated:
+        if not user.has_perms(MonitoringEvaluationConfig.gql_query_indicators_perms):
             raise PermissionDenied(_("Authentification requise."))
 
         qs = MonitoringLog.objects.select_related("executed_by")

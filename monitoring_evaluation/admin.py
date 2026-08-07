@@ -1,8 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
 from datetime import date
-from django_json_widget.widgets import JSONEditorWidget
-from django.db import models
 
 from .models import Indicator, IndicatorValue, MonitoringLog, IndicatorDataSource
 from .indicators_services import calculate_me_indicators_for_period
@@ -93,22 +91,13 @@ def recalculate_indicators(modeladmin, request, queryset):
     count = 0
     errors = []
 
-    for ind in indicators:
-        try:
-            defaults = ind.compute_value(start, end, user=user) if hasattr(ind, "compute_value") \
-                else calculate_me_indicators_for_period(start, end, ctx={"user": user})
-            count += 1
-        except Exception as e:
-            errors.append(f"{ind.code}: {e}")
+    try:
+        count = calculate_me_indicators_for_period(
+            start, end, user=user, indicators=indicators
+        )
+    except Exception as error:
+        errors.append(str(error))
 
-    MonitoringLog.objects.create(
-        period_start=start,
-        period_end=end,
-        executed_by=user,
-        indicators_count=count,
-        success=len(errors) == 0,
-        error_details="\n".join(errors) if errors else None,
-    )
 
     if errors:
         messages.error(
